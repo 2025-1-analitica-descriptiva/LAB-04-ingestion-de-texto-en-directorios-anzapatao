@@ -4,7 +4,9 @@
 """
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
-
+import os
+import zipfile
+import pandas as pd
 
 def pregunta_01():
     """
@@ -71,3 +73,40 @@ def pregunta_01():
 
 
     """
+    # Descomentar la siguiente linea para ejecutar el test
+    # raise NotImplementedError("Falta implementar la funcion pregunta_01")
+
+    # Descomprimir el archivo zip en la raíz del repositorio
+    with zipfile.ZipFile('files/input.zip', 'r') as zip_ref:
+        zip_ref.extractall('.')
+
+    # Crear la carpeta de salida si no existe
+    os.makedirs('files/output', exist_ok=True)
+
+    # Inicializar listas para almacenar los datos
+    train_data = []
+    test_data = []
+
+    # Función para procesar los archivos y agregar a las listas
+    def process_files(directory, data_list):
+        for sentiment in ['positive', 'negative', 'neutral']:
+            path = os.path.join(directory, sentiment)
+            for filename in os.listdir(path):
+                if filename.endswith('.txt'):
+                    with open(os.path.join(path, filename), 'r', encoding='utf-8') as file:
+                        phrase = file.read().strip()
+                        data_list.append({'phrase': phrase, 'target': sentiment})
+
+    # Procesar los archivos de entrenamiento y prueba
+    process_files('input/train', train_data)
+    process_files('input/test', test_data)
+
+    # Crear DataFrames y guardarlos como CSV
+    train_df = pd.DataFrame(train_data)
+    test_df = pd.DataFrame(test_data)
+
+    train_df.to_csv('files/output/train_dataset.csv', index=False)
+    test_df.to_csv('files/output/test_dataset.csv', index=False)
+    
+if __name__ == "__main__":
+    pregunta_01()
